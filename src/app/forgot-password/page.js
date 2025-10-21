@@ -48,10 +48,10 @@ export default function ForgotPasswordPage() {
             </div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Check Your Email</h1>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              We've sent a password reset link to <strong>{email}</strong>
+              We&apos;ve sent a password reset link to <strong>{email}</strong>
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-              Didn't receive the email? Check your spam folder or try again.
+              Didn&apos;t receive the email? Check your spam folder or try again.
             </p>
             <div className="space-y-3">
               <button
@@ -86,7 +86,7 @@ export default function ForgotPasswordPage() {
             </div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Forgot Password?</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              No worries! Enter your email and we'll send you reset instructions.
+              No worries! Enter your email and we&apos;ll send you reset instructions.
             </p>
           </div>
 

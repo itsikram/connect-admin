@@ -439,7 +439,7 @@ export default function ProfilesPage() {
                           {profile.bio && (
                             <div className="mb-4">
                               <p className="text-sm text-gray-600 dark:text-gray-300 italic">
-                                "{profile.bio}"
+                                &ldquo;{profile.bio}&rdquo;
                               </p>
                             </div>
                           )}
@@ -570,7 +570,7 @@ export default function ProfilesPage() {
                     Delete Profile
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                    Are you sure you want to delete <strong>{getProfileName(deletingProfile)}</strong>'s profile? This action cannot be undone.
+                    Are you sure you want to delete <strong>{getProfileName(deletingProfile)}</strong>&apos;s profile? This action cannot be undone.
                   </p>
                   
                   <div className="text-left text-sm text-gray-500 dark:text-gray-400 mb-6">

@@ -194,7 +194,7 @@ export default function DashboardPage() {
             {/* Page header */}
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">Welcome back! Here's what's happening with your platform.</p>
+              <p className="mt-2 text-gray-600 dark:text-gray-400">Welcome back! Here&apos;s what&apos;s happening with your platform.</p>
           {error && (
             <div className="mt-3 text-sm text-red-600 dark:text-red-400">{error}</div>
           )}

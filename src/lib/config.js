@@ -134,7 +134,7 @@ export const DEFAULT_VALUES = {
 };
 
 // Export all configurations
-export default {
+const config = {
   API_CONFIG,
   APP_CONFIG,
   ENV_CONFIG,
@@ -147,3 +147,5 @@ export default {
   VALIDATION_RULES,
   DEFAULT_VALUES,
 };
+
+export default config;

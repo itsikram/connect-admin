@@ -336,7 +336,7 @@ export default function ProfileViewPage() {
                       {profile.bio && (
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Bio</label>
-                          <p className="text-sm text-gray-900 dark:text-white italic">"{profile.bio}"</p>
+                          <p className="text-sm text-gray-900 dark:text-white italic">&ldquo;{profile.bio}&rdquo;</p>
                         </div>
                       )}
                       
@@ -515,7 +515,7 @@ export default function ProfileViewPage() {
                       </h3>
                       <div className="mt-2">
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Are you sure you want to delete <strong>{profileName}</strong>'s profile? This action cannot be undone and will permanently remove all profile data.
+                          Are you sure you want to delete <strong>{profileName}</strong>&apos;s profile? This action cannot be undone and will permanently remove all profile data.
                         </p>
                       </div>
                     </div>

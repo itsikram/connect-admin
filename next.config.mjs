@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Configure the port
-  port: 5000,
-  
   // Environment variables configuration
   env: {
     // Make environment variables available to the client
@@ -19,11 +16,8 @@ const nextConfig = {
     NEXT_PUBLIC_ENABLE_DARK_MODE: process.env.NEXT_PUBLIC_ENABLE_DARK_MODE,
   },
   
-  // Experimental features
-  experimental: {
-    // Enable server components
-    serverComponentsExternalPackages: ['dotenv'],
-  },
+  // Server external packages (moved from experimental)
+  serverExternalPackages: ['dotenv'],
 };
 
 export default nextConfig;

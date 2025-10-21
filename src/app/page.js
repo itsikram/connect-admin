@@ -68,7 +68,7 @@ export default function Home() {
             </div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Analytics Dashboard</h3>
             <p className="text-gray-600 dark:text-gray-400">
-              Get comprehensive insights into your platform's performance with real-time analytics and reporting.
+              Get comprehensive insights into your platform&apos;s performance with real-time analytics and reporting.
             </p>
           </div>
 
