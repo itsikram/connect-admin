@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API Test</h1>
+    <button onclick="testSignup()">Test Signup</button>
+    <button onclick="testLogin()">Test Login</button>
+    <div id="result"></div>
+
+    <script>
+        async function testSignup() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing Signup...';
+            
+            try {
+                const response = await fetch('http://localhost:4000/api/admin/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        fullName: 'Test User',
+                        email: 'test@example.com',
+                        password: 'Test123456',
+                        role: 'admin'
+                    })
+                });
+                
+                console.log('Signup Response status:', response.status);
+                console.log('Signup Response headers:', Object.fromEntries(response.headers.entries()));
+                
+                const contentType = response.headers.get('content-type');
+                console.log('Signup Content-Type:', contentType);
+                
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = '<pre>Signup Success: ' + JSON.stringify(data, null, 2) + '</pre>';
+                } else {
+                    const text = await response.text();
+                    resultDiv.innerHTML = '<pre>Signup Non-JSON response: ' + text + '</pre>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<pre>Signup Error: ' + error.message + '</pre>';
+                console.error('Signup Error:', error);
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing Login...';
+            
+            try {
+                const response = await fetch('http://localhost:4000/api/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'Test123456'
+                    })
+                });
+                
+                console.log('Login Response status:', response.status);
+                console.log('Login Response headers:', Object.fromEntries(response.headers.entries()));
+                
+                const contentType = response.headers.get('content-type');
+                console.log('Login Content-Type:', contentType);
+                
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = '<pre>Login Success: ' + JSON.stringify(data, null, 2) + '</pre>';
+                } else {
+                    const text = await response.text();
+                    resultDiv.innerHTML = '<pre>Login Non-JSON response: ' + text + '</pre>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<pre>Login Error: ' + error.message + '</pre>';
+                console.error('Login Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
