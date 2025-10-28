@@ -26,9 +26,9 @@ export default function SettingsPage() {
       defaultLanguage: 'en',
       defaultTimezone: 'UTC',
       isMaintenanceMode: false,
-      siteUrl: 'https://connect.example.com',
+      siteUrl: 'https://connect-zfgx.onrender.com/',
       siteLogo: config?.logo,
-
+      apkUrl: ''
     },
     user: {
       allowRegistration: true,
@@ -430,6 +430,8 @@ export default function SettingsPage() {
                             </div>
                             {renderField('general', 'siteTitle', 'Site Title')}
                             {renderField('general', 'siteUrl', 'Site URL', 'url')}
+                            {renderField('general', 'apkUrl', 'APK URL', 'url')}
+                            {renderField('general', 'ipaUrl', 'IPA URL', 'url')}
                             {renderField('general', 'showAds', 'Show Ads', 'checkbox')}
                             {renderField('general', 'registerNewAccount', 'Register New Account', 'checkbox')}
                             {renderField('general', 'defaultTheme', 'Default Theme', 'select', [
