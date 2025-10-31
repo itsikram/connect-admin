@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '../../../contexts/AuthContext';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import api from '../../../lib/api';
+import AdminSidebar from '../../../components/AdminSidebar';
 
 export default function PostsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -187,7 +188,7 @@ export default function PostsPage() {
           </div>
           
           {/* Sidebar Navigation */}
-          <nav className="flex-1 px-6 py-8 overflow-y-auto">
+          {/* <nav className="flex-1 px-6 py-8 overflow-y-auto">
             <ul className="space-y-2">
               {navigation.map((item) => (
                 <li key={item.name}>
@@ -207,7 +208,8 @@ export default function PostsPage() {
                 </li>
               ))}
             </ul>
-          </nav>
+          </nav> */}
+          <AdminSidebar sidebarOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
           {/* Sidebar Footer */}
           <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
