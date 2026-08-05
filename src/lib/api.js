@@ -1,15 +1,18 @@
 import axios from 'axios';
 import { API_ENDPOINTS, API_CONFIG, ERROR_MESSAGES } from './config';
 
-// Helper function to get token safely
+// Helper function to get token safely (adminToken from AuthContext)
 const getToken = () => {
   if (typeof window !== 'undefined') {
     try {
-      const user = localStorage.getItem("user") || '{}';
+      const adminToken = localStorage.getItem('adminToken');
+      if (adminToken) return adminToken;
+
+      const user = localStorage.getItem('user') || '{}';
       const userJson = JSON.parse(user);
       return userJson.accessToken || '';
     } catch (error) {
-      console.error('Error parsing user data from localStorage:', error);
+      console.error('Error parsing auth token from localStorage:', error);
       return '';
     }
   }
@@ -46,6 +49,8 @@ api.interceptors.response.use(
             // Token expired or invalid, redirect to login
             if (typeof window !== 'undefined') {
                 localStorage.removeItem('user');
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminData');
                 window.location.href = '/login';
             }
         }
