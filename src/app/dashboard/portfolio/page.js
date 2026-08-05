@@ -72,6 +72,52 @@ function TextArea(props) {
   return <textarea className={`${inputClass} min-h-[96px]`} {...props} />;
 }
 
+function formatCsv(arr) {
+  if (!Array.isArray(arr)) return String(arr || '');
+  return arr.join(', ');
+}
+
+function parseCsv(value) {
+  return String(value || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Comma-separated list input that keeps the raw text while typing
+ * (so trailing commas / spaces aren't stripped mid-edit).
+ */
+function CsvInput({ value, onChange, placeholder = 'value1, value2, value3' }) {
+  const [focused, setFocused] = useState(false);
+  const [draft, setDraft] = useState('');
+  const display = focused ? draft : formatCsv(value);
+
+  return (
+    <input
+      className={inputClass}
+      value={display}
+      placeholder={placeholder}
+      onFocus={() => {
+        setDraft(formatCsv(value));
+        setFocused(true);
+      }}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={() => {
+        onChange(parseCsv(draft));
+        setFocused(false);
+      }}
+      onKeyDown={(e) => {
+        // Enter commits the current list without submitting the page
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          e.currentTarget.blur();
+        }
+      }}
+    />
+  );
+}
+
 function SectionCard({ title, children, actions }) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -244,14 +290,6 @@ export default function PortfolioAdminPage() {
     }
   };
 
-  const csvToList = (value) =>
-    String(value || '')
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-  const listToCsv = (arr) => (Array.isArray(arr) ? arr.join(', ') : '');
-
   return (
     <ProtectedRoute>
       <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
@@ -349,10 +387,11 @@ export default function PortfolioAdminPage() {
                       <Field label="Job title">
                         <TextInput value={data.profile?.jobTitle || ''} onChange={(e) => setPath('profile.jobTitle', e.target.value)} />
                       </Field>
-                      <Field label="Alternate names" hint="Comma-separated">
-                        <TextInput
-                          value={listToCsv(data.profile?.alternateNames)}
-                          onChange={(e) => setPath('profile.alternateNames', csvToList(e.target.value))}
+                      <Field label="Alternate names" hint="Comma-separated — type freely, then click outside or press Enter">
+                        <CsvInput
+                          value={data.profile?.alternateNames}
+                          onChange={(list) => setPath('profile.alternateNames', list)}
+                          placeholder="Md Ikramul, Ikramul Islam, Programmer Ikram"
                         />
                       </Field>
                       <Field label="Tagline">
@@ -616,14 +655,15 @@ export default function PortfolioAdminPage() {
                               setPath('skills.groups', groups);
                             }}
                           />
-                          <Field label="Skills" hint="Comma-separated">
-                            <TextInput
-                              value={listToCsv(group.items)}
-                              onChange={(e) => {
+                          <Field label="Skills" hint="Comma-separated — type freely, then click outside or press Enter">
+                            <CsvInput
+                              value={group.items}
+                              onChange={(list) => {
                                 const groups = [...(data.skills?.groups || [])];
-                                groups[idx] = { ...groups[idx], items: csvToList(e.target.value) };
+                                groups[idx] = { ...groups[idx], items: list };
                                 setPath('skills.groups', groups);
                               }}
+                              placeholder="React.js, Node.js, MongoDB"
                             />
                           </Field>
                         </div>
@@ -687,14 +727,15 @@ export default function PortfolioAdminPage() {
                             setPath('projects.items', items);
                           }}
                         />
-                        <Field label="Tags" hint="Comma-separated">
-                          <TextInput
-                            value={listToCsv(item.tags)}
-                            onChange={(e) => {
+                        <Field label="Tags" hint="Comma-separated — type freely, then click outside or press Enter">
+                          <CsvInput
+                            value={item.tags}
+                            onChange={(list) => {
                               const items = [...(data.projects?.items || [])];
-                              items[idx] = { ...items[idx], tags: csvToList(e.target.value) };
+                              items[idx] = { ...items[idx], tags: list };
                               setPath('projects.items', items);
                             }}
+                            placeholder="React, UX, Performance"
                           />
                         </Field>
                       </div>
@@ -967,14 +1008,15 @@ export default function PortfolioAdminPage() {
                             }}
                           />
                         </div>
-                        <Field label="Tags" hint="Comma-separated">
-                          <TextInput
-                            value={listToCsv(post.tags)}
-                            onChange={(e) => {
+                        <Field label="Tags" hint="Comma-separated — type freely, then click outside or press Enter">
+                          <CsvInput
+                            value={post.tags}
+                            onChange={(list) => {
                               const posts = [...(data.blogs?.posts || [])];
-                              posts[idx] = { ...posts[idx], tags: csvToList(e.target.value) };
+                              posts[idx] = { ...posts[idx], tags: list };
                               setPath('blogs.posts', posts);
                             }}
+                            placeholder="React, CSS, Accessibility"
                           />
                         </Field>
                       </div>
