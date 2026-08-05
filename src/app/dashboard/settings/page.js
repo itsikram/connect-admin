@@ -7,6 +7,7 @@ import ProtectedRoute from '../../../components/ProtectedRoute';
 import axios from 'axios';
 import config from '../../../config/config.json';
 import AdminSidebar from '../../../components/AdminSidebar';
+import { API_CONFIG } from '../../../lib/config';
 
 export default function SettingsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -108,7 +109,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const fetchSettings = async () => {
-      let res = await axios.get(process.env.NEXT_PUBLIC_API_URL + '/api/connect');
+      let res = await axios.get(API_CONFIG.BASE_URL + '/api/connect');
       if (res.status === 200) {
         setSettings(prev => ({
           ...prev,
@@ -127,7 +128,7 @@ export default function SettingsPage() {
     
     try {
       // Simulate API call
-      let res =await axios.put(process.env.NEXT_PUBLIC_API_URL + '/api/connect', settings.general);
+      let res =await axios.put(API_CONFIG.BASE_URL + '/api/connect', settings.general);
       if (res.status === 200 || res.status === 201) {
         setSettings(prev => ({
           ...prev,
@@ -353,7 +354,7 @@ export default function SettingsPage() {
 
                                     try {
                                       // Replace with your actual upload endpoint
-                                      const res = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/upload/admin', formData, {
+                                      const res = await axios.post(API_CONFIG.BASE_URL + '/api/upload/admin', formData, {
                                         method: 'POST',
                                         headers: {
                                           'Content-Type': 'multipart/form-data'

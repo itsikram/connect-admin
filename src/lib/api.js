@@ -17,7 +17,7 @@ const getToken = () => {
 };
 
 const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL + '/api/admin',
+    baseURL: `${API_CONFIG.BASE_URL}/api/admin`,
     headers: {
         "User-Agent": "MyCustomUserAgent",
         "Access-Control-Allow-Origin": "*",

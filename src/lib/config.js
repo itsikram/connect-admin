@@ -1,9 +1,11 @@
 // Environment configuration for Admin Portal
 // This file centralizes all environment variable management
 
-// API Configuration
+// API Configuration (strip trailing slash so paths never become //api/...)
+const normalizeBaseUrl = (url) => (url || 'http://localhost:4000').replace(/\/+$/, '');
+
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
+  BASE_URL: normalizeBaseUrl(process.env.NEXT_PUBLIC_API_URL),
   TIMEOUT: parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT) || 10000,
   RETRY_ATTEMPTS: parseInt(process.env.NEXT_PUBLIC_API_RETRY_ATTEMPTS) || 3,
 };
