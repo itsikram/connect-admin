@@ -58,21 +58,57 @@ export default function ViewPostPage() {
     }
   };
 
-  const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z', current: false },
-    { name: 'Users', href: '/dashboard/users', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z', current: false },
-    { name: 'Profiles', href: '/dashboard/profiles', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', current: false },
-    { name: 'Posts', href: '/dashboard/posts', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', current: true },
-    { name: 'Analytics', href: '/dashboard/analytics', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', current: false },
-    { name: 'Settings', href: '/dashboard/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z', current: false }
-  ];
-
   // Helper functions
   const getPostAuthor = (post) => {
     if (post.author) {
       return post.author.fullName || post.author.displayName || 'Unknown User';
     }
     return 'Unknown User';
+  };
+
+  const getPostCaption = (post) => {
+    const caption = post.caption || post.content || post.text;
+    if (caption && String(caption).trim()) return caption;
+    if (post.type === 'profilePic' || post.type === 'coverPic') return '';
+    return 'No caption available';
+  };
+
+  const getAuthorAvatar = (post) => post.author?.profilePic || '';
+
+  const getAudienceLabel = (audience) => {
+    const value = typeof audience === 'string' ? audience.toLowerCase() : audience;
+    switch (value) {
+      case 1:
+      case '1':
+      case 'public':
+        return 'Public';
+      case 2:
+      case '2':
+      case 'friends':
+        return 'Friends';
+      case 3:
+      case '3':
+      case 'private':
+      case 'only me':
+      case 'onlyme':
+        return 'Only Me';
+      default:
+        return audience ? String(audience) : 'Public';
+    }
+  };
+
+  const getAudienceStyle = (audience) => {
+    const label = getAudienceLabel(audience);
+    switch (label) {
+      case 'Public':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'Friends':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'Only Me':
+        return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+    }
   };
 
   const getPostDate = (post) => {
@@ -162,8 +198,11 @@ export default function ViewPostPage() {
   }
 
   const author = getPostAuthor(post);
+  const authorAvatar = getAuthorAvatar(post);
   const postDate = getPostDate(post);
   const postType = getPostType(post);
+  const caption = getPostCaption(post);
+  const audienceLabel = getAudienceLabel(post.audience);
 
   return (
     <ProtectedRoute>
@@ -231,20 +270,34 @@ export default function ViewPostPage() {
                 <div className="p-6">
                   {/* Post Header */}
                   <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="h-12 w-12 rounded-full bg-indigo-600 flex items-center justify-center">
+                    <div className="flex items-center space-x-4 min-w-0">
+                      {authorAvatar ? (
+                        <img
+                          src={authorAvatar}
+                          alt={author}
+                          className="h-12 w-12 rounded-full object-cover flex-shrink-0"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <div className={`h-12 w-12 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0 ${authorAvatar ? 'hidden' : ''}`}>
                         <span className="text-lg font-medium text-white">
-                          {author.split(' ').map(n => n[0]).join('').toUpperCase()}
+                          {author.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
                         </span>
                       </div>
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">{author}</h3>
+                      <div className="min-w-0">
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white truncate">{author}</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">{postDate}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getPostTypeColor(postType)}`}>
                         {postType}
+                      </span>
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getAudienceStyle(post.audience)}`}>
+                        {audienceLabel}
                       </span>
                       <span className="text-sm text-gray-400">
                         ID: {post._id.slice(-8)}
@@ -288,11 +341,13 @@ export default function ViewPostPage() {
                       </div>
                     )}
                     
-                    <div className="prose dark:prose-invert max-w-none">
-                      <p className="text-gray-900 dark:text-white text-base leading-relaxed">
-                        {post.content || post.text || post.caption || (post.type === 'profilePic' || post.type === 'coverPic' ? '' : 'No content available')}
-                      </p>
-                    </div>
+                    {caption ? (
+                      <div className="prose dark:prose-invert max-w-none">
+                        <p className="text-gray-900 dark:text-white text-base leading-relaxed">
+                          {caption}
+                        </p>
+                      </div>
+                    ) : null}
                   </div>
 
                   {/* Post Media */}
@@ -399,7 +454,7 @@ export default function ViewPostPage() {
                       <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                         <div><span className="font-medium">Created:</span> {new Date(post.createdAt).toLocaleString()}</div>
                         <div><span className="font-medium">Updated:</span> {new Date(post.updatedAt).toLocaleString()}</div>
-                        <div><span className="font-medium">Audience:</span> {post.audience || 'Public'}</div>
+                        <div><span className="font-medium">Audience:</span> {audienceLabel}</div>
                         {post.feelings && <div><span className="font-medium">Feelings:</span> {post.feelings}</div>}
                         {post.location && <div><span className="font-medium">Location:</span> {post.location}</div>}
                       </div>
