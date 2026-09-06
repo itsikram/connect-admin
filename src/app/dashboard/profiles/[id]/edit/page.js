@@ -32,7 +32,8 @@ export default function ProfileEditPage() {
     DOB: '',
     presentAddress: '',
     permanentAddress: '',
-    isActive: true
+    isActive: true,
+    isVerified: false
   });
 
   // Fetch profile data
@@ -54,7 +55,8 @@ export default function ProfileEditPage() {
           DOB: profileData.user?.DOB || '',
           presentAddress: profileData.presentAddress || '',
           permanentAddress: profileData.permanentAddress || '',
-          isActive: profileData.isActive !== false
+          isActive: profileData.isActive !== false,
+          isVerified: profileData.isVerified === true
         });
         
         setError(null);
@@ -483,6 +485,19 @@ export default function ProfileEditPage() {
                       />
                       <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900 dark:text-white">
                         Account is active
+                      </label>
+                    </div>
+                    <div className="flex items-center mt-4">
+                      <input
+                        type="checkbox"
+                        name="isVerified"
+                        id="isVerified"
+                        checked={formData.isVerified}
+                        onChange={handleInputChange}
+                        className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 dark:border-gray-600 rounded"
+                      />
+                      <label htmlFor="isVerified" className="ml-2 block text-sm text-gray-900 dark:text-white">
+                        Green verified profile
                       </label>
                     </div>
                   </div>
