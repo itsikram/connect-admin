@@ -14,13 +14,16 @@ const AI_PROVIDERS = [
   { id: 'gemini', label: 'Google Gemini', hint: 'Google AI Studio key. Comma-separate multiple keys for quota failover.' },
   { id: 'openai', label: 'OpenAI ChatGPT', hint: 'From platform.openai.com. Starts with sk-.' },
   { id: 'cursor', label: 'Cursor API', hint: 'From Cursor Dashboard → API Keys. Starts with crsr_. In-app chat uses a no-repo Cloud Agent (Composer 2.5 Fast).' },
+  { id: 'grok', label: 'xAI Grok', hint: 'xAI API key. Stored on the server and sent only to api.x.ai.' },
+  { id: 'groq', label: 'Groq Cloud', hint: 'Groq API key. Stored on the server and sent only to api.groq.com.' },
 ];
 
 const AI_MODEL_OPTIONS = {
   gemini: [
-    { id: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
+    { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash (fast)' },
+    { id: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash-Lite' },
     { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
-    { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
+    { id: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
     { id: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' },
     { id: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
   ],
@@ -46,6 +49,15 @@ const AI_MODEL_OPTIONS = {
     { id: 'gpt-5.4', label: 'GPT-5.4' },
     { id: 'gemini-3.1-pro', label: 'Gemini 3.1 Pro' },
     { id: 'claude-haiku-4-5', label: 'Claude Haiku 4.5' },
+  ],
+  grok: [
+    { id: 'grok-3-mini', label: 'Grok 3 Mini (fast)' },
+    { id: 'grok-3', label: 'Grok 3' },
+  ],
+  groq: [
+    { id: 'openai/gpt-oss-20b', label: 'GPT-OSS 20B (fast, tool-capable)' },
+    { id: 'openai/gpt-oss-120b', label: 'GPT-OSS 120B (higher quality)' },
+    { id: 'qwen/qwen3.6-27b', label: 'Qwen 3.6 27B' },
   ],
 };
 
@@ -80,14 +92,16 @@ const mergeModelOptions = (...lists) => {
 
 const createEmptyAiSettings = () => ({
   defaultProvider: 'gemini',
-  enabled: { gemini: true, openai: true, cursor: true },
+  enabled: { gemini: true, openai: true, cursor: true, grok: true, groq: true },
   models: {
-    gemini: 'gemini-3.5-flash',
+    gemini: 'gemini-2.0-flash',
     openai: 'gpt-4o-mini',
     cursor: 'composer-2.5',
+    grok: 'grok-3-mini',
+    groq: 'openai/gpt-oss-20b',
   },
-  keys: { gemini: '', openai: '', cursor: '' },
-  configured: { gemini: false, openai: false, cursor: false },
+  keys: { gemini: '', openai: '', cursor: '', grok: '', groq: '' },
+  configured: { gemini: false, openai: false, cursor: false, grok: false, groq: false },
   cursorRepoUrl: '',
   cursorModels: mergeModelOptions(AI_MODEL_OPTIONS.cursor),
 });
@@ -105,6 +119,7 @@ export default function SettingsPage() {
     gemini: false,
     openai: false,
     cursor: false,
+    grok: false,
   });
   const { admin } = useAuth();
 
@@ -209,7 +224,7 @@ export default function SettingsPage() {
       configured: { ...base.configured, ...(data.configured || {}) },
       cursorRepoUrl: data.cursorRepoUrl || '',
       cursorModels: mergeModelOptions(base.cursorModels, data.cursorModels),
-      keys: { gemini: '', openai: '', cursor: '' },
+      keys: { gemini: '', openai: '', cursor: '', grok: '', groq: '' },
     });
   };
 
@@ -269,7 +284,7 @@ export default function SettingsPage() {
           cursorRepoUrl: aiSettings.cursorRepoUrl,
           keys: {},
         };
-        ['gemini', 'openai', 'cursor'].forEach((provider) => {
+        ['gemini', 'openai', 'cursor', 'grok'].forEach((provider) => {
           const value = String(aiSettings.keys?.[provider] || '').trim();
           if (value) payload.keys[provider] = value;
         });
@@ -766,7 +781,7 @@ export default function SettingsPage() {
 
                               <div className="space-y-3">
                                 <h4 className="text-md font-medium text-gray-900 dark:text-white">Default provider</h4>
-                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-5">
                                   {AI_PROVIDERS.map((item) => {
                                     const active = aiSettings.defaultProvider === item.id;
                                     return (
