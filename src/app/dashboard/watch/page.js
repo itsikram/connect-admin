@@ -6,6 +6,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import AdminSidebar from '../../../components/AdminSidebar';
 import api from '../../../lib/api';
+import AICategoryDetails from '../../../components/AICategoryDetails';
 
 export default function WatchPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -323,6 +324,8 @@ export default function WatchPage() {
                               {watch.caption || 'No caption available'}
                             </p>
                           </div>
+
+                          <AICategoryDetails metadata={watch.aiMetadata} />
 
                           {/* Video Thumbnail */}
                           {watch.thumbnail && (

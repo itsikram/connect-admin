@@ -409,6 +409,38 @@ export default function ProfileViewPage() {
                     </div>
                   </div>
 
+                  {/* Learned interests */}
+                  <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
+                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">Loved categories</h3>
+                    </div>
+                    <div className="px-6 py-6">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                        Based on {profile.interestCount || 0} interactions
+                      </p>
+                      {profile.lovedCategories?.length ? (
+                        <div className="space-y-3">
+                          {profile.lovedCategories.map((category) => (
+                            <div key={category.name}>
+                              <div className="flex justify-between text-sm mb-1">
+                                <span className="text-gray-700 dark:text-gray-300">{category.name}</span>
+                                <span className="text-gray-500 dark:text-gray-400">{category.score.toFixed(1)}</span>
+                              </div>
+                              <div className="h-2 rounded-full bg-gray-200 dark:bg-gray-700">
+                                <div
+                                  className="h-2 rounded-full bg-indigo-600"
+                                  style={{ width: `${Math.min(100, (category.score / Math.max(profile.lovedCategories[0].score, 1)) * 100)}%` }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500 dark:text-gray-400">No learned categories yet</p>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Account Status */}
                   <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
                     <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">

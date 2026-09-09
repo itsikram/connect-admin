@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '../../../contexts/AuthContext';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import api from '../../../lib/api';
+import AICategoryDetails from '../../../components/AICategoryDetails';
 import AdminSidebar from '../../../components/AdminSidebar';
 
 export default function PostsPage() {
@@ -409,6 +410,7 @@ export default function PostsPage() {
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
                                   </div>
+
                                   <div className="ml-2">
                                     <p className="text-xs font-medium text-pink-800 dark:text-pink-200">
                                       Updated Profile Picture
@@ -487,6 +489,8 @@ export default function PostsPage() {
                               </a>
                             </div>
                           )}
+
+                          <AICategoryDetails metadata={post.aiMetadata} />
 
                           {/* Post Stats */}
                           <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-4">

@@ -423,6 +423,29 @@ export default function ProfilesPage() {
                             </div>
                           </div>
 
+                          <div className="mb-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="text-sm font-medium text-gray-900 dark:text-white">Loved categories</h4>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {profile.interestCount || 0} interactions
+                              </span>
+                            </div>
+                            {profile.lovedCategories?.length ? (
+                              <div className="flex flex-wrap gap-2">
+                                {profile.lovedCategories.map((category) => (
+                                  <span
+                                    key={category.name}
+                                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200"
+                                  >
+                                    {category.name}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-xs text-gray-500 dark:text-gray-400">No learned categories yet</p>
+                            )}
+                          </div>
+
                           {/* Additional Info */}
                           <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400">
                             <div className="flex justify-between">
