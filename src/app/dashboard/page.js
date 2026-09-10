@@ -214,7 +214,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="px-6 py-6">
                   <div className="grid grid-cols-2 gap-4">
-                    <button className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left">
+                    <Link href="/register" className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left">
                       <div className="flex items-center">
                         <div className="w-10 h-10 bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -226,9 +226,9 @@ export default function DashboardPage() {
                           <div className="text-xs text-gray-500 dark:text-gray-400">Create new account</div>
                         </div>
                       </div>
-                    </button>
+                    </Link>
                     
-                    <button className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left">
+                    <Link href="/dashboard/analytics" className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left">
                       <div className="flex items-center">
                         <div className="w-10 h-10 bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,9 +240,9 @@ export default function DashboardPage() {
                           <div className="text-xs text-gray-500 dark:text-gray-400">Analytics & insights</div>
                         </div>
                       </div>
-                    </button>
+                    </Link>
                     
-                    <button className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left">
+                    <Link href="/dashboard/settings" className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left">
                       <div className="flex items-center">
                         <div className="w-10 h-10 bg-yellow-100 text-yellow-600 dark:bg-yellow-900 dark:text-yellow-300 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -254,9 +254,12 @@ export default function DashboardPage() {
                           <div className="text-xs text-gray-500 dark:text-gray-400">Configure system</div>
                         </div>
                       </div>
-                    </button>
+                    </Link>
                     
-                    <button className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left">
+                    <a
+                      href={admin?.email ? `mailto:${admin.email}?subject=Admin%20Dashboard%20Support` : 'mailto:'}
+                      className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
+                    >
                       <div className="flex items-center">
                         <div className="w-10 h-10 bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-300 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -268,7 +271,7 @@ export default function DashboardPage() {
                           <div className="text-xs text-gray-500 dark:text-gray-400">Get help</div>
                         </div>
                       </div>
-                    </button>
+                    </a>
                   </div>
                 </div>
               </div>
