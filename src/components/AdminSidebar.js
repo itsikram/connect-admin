@@ -20,10 +20,12 @@ export default function AdminSidebar({ sidebarOpen = false, onClose }) {
     { name: 'Reported Profiles', href: '/dashboard/reports/profiles', icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z' },
     { name: 'Analytics', href: '/dashboard/analytics', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
     { name: 'Payments', href: '/dashboard/payments', icon: 'M2 7h20M4 5h16a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V7a2 2 0 012-2zm3 8h4' },
+    { name: 'Payouts', href: '/dashboard/payouts', icon: 'M12 3v18m-5-5h6a3 3 0 000-6H9a3 3 0 010-6h6' },
     { name: 'Subscriptions', href: '/dashboard/subscriptions', icon: 'M12 3l2.4 4.86 5.37.78-3.89 3.79.92 5.35L12 15.25l-4.8 2.53.92-5.35-3.89-3.79 5.37-.78L12 3z' },
     { name: 'Monetization', href: '/dashboard/monetization', icon: 'M12 8c-2.21 0-4 1.343-4 3s1.79 3 4 3 4 1.343 4 3-1.79 3-4 3m0-12V5m0 14v-2M5 12H3m18 0h-2' },
     { name: 'Cloudinary', href: '/dashboard/cloudinary', icon: 'M12 3a5 5 0 00-4.9 4.02A5.5 5.5 0 004 17.5a5.5 5.5 0 005.5 5.5h5A5.5 5.5 0 0020 17.5a5.5 5.5 0 00-3.1-4.95A5 5 0 0012 3z' },
     { name: 'Settings', href: '/dashboard/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
+    { name: 'AI Auto Posts', href: '/dashboard/ai-auto-posts', icon: 'M12 3v3m0 12v3M3 12h3m12 0h3M5.64 5.64l2.12 2.12m8.48 8.48l2.12 2.12m0-12.72l-2.12 2.12m-8.48 8.48l-2.12 2.12M16 12a4 4 0 11-8 0 4 4 0 018 0z' },
   ];
 
   const isCurrent = (href) => {
