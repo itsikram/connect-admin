@@ -160,7 +160,7 @@ export default function PortfolioAdminPage() {
   const resolveMediaUrl = (url) => {
     if (!url) return '';
     if (/^https?:\/\//i.test(url) || url.startsWith('blob:')) return url;
-    return `https://connect-zfgx.onrender.com${url.startsWith('/') ? '' : '/'}${url}`;
+    return `https://connect-bd.online${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   const authHeaders = useCallback(() => {
@@ -316,7 +316,7 @@ export default function PortfolioAdminPage() {
               <a
                 href={`${(typeof window !== 'undefined' && window.location.hostname.includes('localhost')
                   ? 'http://localhost:3000'
-                  : 'https://connect-zfgx.onrender.com')}/portfolio`}
+                  : 'https://connect-bd.online')}/portfolio`}
                 target="_blank"
                 rel="noreferrer"
                 className="hidden rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 sm:inline-flex dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"

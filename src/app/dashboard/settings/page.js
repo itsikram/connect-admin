@@ -134,7 +134,7 @@ export default function SettingsPage() {
       defaultLanguage: 'en',
       defaultTimezone: 'UTC',
       isMaintenanceMode: false,
-      siteUrl: 'https://connect-zfgx.onrender.com/',
+      siteUrl: 'https://connect-bd.online/',
       siteLogo: config?.logo,
       apkUrl: '',
       appVersion: '',
