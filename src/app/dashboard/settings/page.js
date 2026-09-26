@@ -20,12 +20,11 @@ const AI_PROVIDERS = [
 
 const AI_MODEL_OPTIONS = {
   gemini: [
-    { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash (fast)' },
-    { id: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash-Lite' },
-    { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+    { id: 'gemini-3.8-flash', label: 'Gemini 3.8 Flash (recommended)' },
+    { id: 'gemini-flash-latest', label: 'Gemini Flash (latest)' },
     { id: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
-    { id: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' },
-    { id: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
+    { id: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash-Lite (fastest)' },
+    { id: 'gemini-flash-lite-latest', label: 'Gemini Flash-Lite (latest)' },
   ],
   openai: [
     { id: 'gpt-4o-mini', label: 'GPT-4o mini' },
@@ -94,7 +93,7 @@ const createEmptyAiSettings = () => ({
   defaultProvider: 'gemini',
   enabled: { gemini: true, openai: true, cursor: true, grok: true, groq: true },
   models: {
-    gemini: 'gemini-2.0-flash',
+    gemini: 'gemini-3.8-flash',
     openai: 'gpt-4o-mini',
     cursor: 'composer-2.5',
     grok: 'grok-3-mini',
