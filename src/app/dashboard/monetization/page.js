@@ -12,6 +12,7 @@ const FLAG_LABELS = {
   tippingEnabled: 'Creator tipping',
   affiliateLinksEnabled: 'Affiliate links',
   manualPaymentEnabled: 'Manual bKash/Nagad payments',
+  recoveryEnabled: 'Recovery (quit drugs & smoking)',
 };
 
 const DEFAULTS = {
