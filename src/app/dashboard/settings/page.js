@@ -9,6 +9,7 @@ import config from '../../../config/config.json';
 import AdminSidebar from '../../../components/AdminSidebar';
 import { API_CONFIG } from '../../../lib/config';
 import adminApi from '../../../lib/api';
+import ServerSettingsPanel from './ServerSettingsPanel';
 
 const AI_PROVIDERS = [
   { id: 'gemini', label: 'Google Gemini', hint: 'Google AI Studio key. Comma-separate multiple keys for quota failover.' },
@@ -199,7 +200,8 @@ export default function SettingsPage() {
     { id: 'notifications', name: 'Notifications', icon: 'M15 17h5l-5 5-5-5h5v-5a7.5 7.5 0 00-15 0v5h5l-5 5-5-5h5V7a7.5 7.5 0 0115 0v10z' },
     { id: 'privacy', name: 'Privacy', icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z' },
     { id: 'appearance', name: 'Appearance', icon: 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z' },
-    { id: 'ai', name: 'AI', icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' }
+    { id: 'ai', name: 'AI', icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+    { id: 'servers', name: 'Servers', icon: 'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01' }
   ];
 
   // Handle input changes
@@ -542,7 +544,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Settings Content */}
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
                     <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                       <h3 className="text-lg font-medium text-gray-900 dark:text-white">
@@ -934,7 +936,10 @@ export default function SettingsPage() {
                         </div>
                       )}
 
-                      {/* Save Button */}
+                      {activeTab === 'servers' && <ServerSettingsPanel setMessage={setMessage} />}
+
+                      {/* Save Button (the Servers tab has its own) */}
+                      {activeTab !== 'servers' && (
                       <div className="mt-8 flex justify-end">
                         <button
                           onClick={() => handleSave(activeTab)}
@@ -944,6 +949,7 @@ export default function SettingsPage() {
                           {saving ? 'Saving...' : activeTab === 'ai' ? 'Save AI settings' : 'Save Changes'}
                         </button>
                       </div>
+                      )}
                     </div>
                   </div>
                 </div>
