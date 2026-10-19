@@ -16,8 +16,11 @@ const nextConfig = {
     NEXT_PUBLIC_ENABLE_DARK_MODE: process.env.NEXT_PUBLIC_ENABLE_DARK_MODE,
   },
   
-  // Server external packages (moved from experimental)
-  serverExternalPackages: ['dotenv'],
+  // Static export: `next build` writes a plain HTML/JS/CSS site to ./out
+  // (deployed as a Render Static Site, no Node server).
+  output: 'export',
+  trailingSlash: true,
+  images: { unoptimized: true },
 };
 
 export default nextConfig;

@@ -1,0 +1,56 @@
+# Render Blueprint: deploys the admin panel as a Static Site (no Node server).
+services:
+  - type: web
+    name: connect-admin
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./out
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        sync: false # set in the Render dashboard, e.g. https://your-api.onrender.com/api
+      - key: NODE_VERSION
+        value: "20"
+    # Dynamic pages are exported once with a "_" placeholder; serve that page for every real id.
+    routes:
+      - type: rewrite
+        source: /dashboard/posts/:id/edit
+        destination: /dashboard/posts/_/edit/index.html
+      - type: rewrite
+        source: /dashboard/posts/:id/edit/
+        destination: /dashboard/posts/_/edit/index.html
+      - type: rewrite
+        source: /dashboard/posts/:id
+        destination: /dashboard/posts/_/index.html
+      - type: rewrite
+        source: /dashboard/posts/:id/
+        destination: /dashboard/posts/_/index.html
+      - type: rewrite
+        source: /dashboard/profiles/:id/edit
+        destination: /dashboard/profiles/_/edit/index.html
+      - type: rewrite
+        source: /dashboard/profiles/:id/edit/
+        destination: /dashboard/profiles/_/edit/index.html
+      - type: rewrite
+        source: /dashboard/profiles/:id
+        destination: /dashboard/profiles/_/index.html
+      - type: rewrite
+        source: /dashboard/profiles/:id/
+        destination: /dashboard/profiles/_/index.html
+      - type: rewrite
+        source: /dashboard/watch/:id/edit
+        destination: /dashboard/watch/_/edit/index.html
+      - type: rewrite
+        source: /dashboard/watch/:id/edit/
+        destination: /dashboard/watch/_/edit/index.html
+      - type: rewrite
+        source: /dashboard/watch/:id
+        destination: /dashboard/watch/_/index.html
+      - type: rewrite
+        source: /dashboard/watch/:id/
+        destination: /dashboard/watch/_/index.html
+      - type: rewrite
+        source: /reset-password/:token
+        destination: /reset-password/_/index.html
+      - type: rewrite
+        source: /reset-password/:token/
+        destination: /reset-password/_/index.html
