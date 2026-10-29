@@ -117,7 +117,7 @@ export default function ReportedProfilesPage() {
                                 <div className="flex items-center space-x-2">
                                   <span className="text-gray-700 dark:text-gray-300">{profileName}</span>
                                   {r.targetProfile?._id && (
-                                    <Link href={`/dashboard/profiles/${r.targetProfile._id}`} className="text-indigo-600 dark:text-indigo-400 hover:underline">View</Link>
+                                    <Link href={`/dashboard/profiles/view/?id=${r.targetProfile._id}`} className="text-indigo-600 dark:text-indigo-400 hover:underline">View</Link>
                                   )}
                                 </div>
                               </td>

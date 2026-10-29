@@ -386,7 +386,7 @@ export default function WatchPage() {
                             </span>
                             <div className="flex space-x-2">
                               <Link
-                                href={`/dashboard/watch/${watch._id}`}
+                                href={`/dashboard/watch/view/?id=${watch._id}`}
                                 className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
                                 title="View Video"
                               >
@@ -395,7 +395,7 @@ export default function WatchPage() {
                                 </svg>
                               </Link>
                               <Link
-                                href={`/dashboard/watch/${watch._id}/edit`}
+                                href={`/dashboard/watch/edit/?id=${watch._id}`}
                                 className="p-2 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer"
                                 title="Edit Video"
                               >

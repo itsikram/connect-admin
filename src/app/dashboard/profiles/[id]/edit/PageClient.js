@@ -95,7 +95,7 @@ export default function ProfileEditPage() {
       
       setSuccess(true);
       setTimeout(() => {
-        router.push(`/dashboard/profiles/${params.id}`);
+        router.push(`/dashboard/profiles/view/?id=${params.id}`);
       }, 1500);
       
     } catch (err) {
@@ -200,7 +200,7 @@ export default function ProfileEditPage() {
             <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
               <div className="flex flex-1">
                 <Link 
-                  href={`/dashboard/profiles/${params.id}`}
+                  href={`/dashboard/profiles/view/?id=${params.id}`}
                   className="flex items-center text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 >
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -507,7 +507,7 @@ export default function ProfileEditPage() {
                 {/* Form Actions */}
                 <div className="flex justify-end space-x-3">
                   <Link
-                    href={`/dashboard/profiles/${params.id}`}
+                    href={`/dashboard/profiles/view/?id=${params.id}`}
                     className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
                   >
                     Cancel

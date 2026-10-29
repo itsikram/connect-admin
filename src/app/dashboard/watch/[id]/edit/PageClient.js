@@ -75,7 +75,7 @@ export default function WatchEditPage() {
       
       setSuccess(true);
       setTimeout(() => {
-        router.push(`/dashboard/watch/${params.id}`);
+        router.push(`/dashboard/watch/view/?id=${params.id}`);
       }, 1500);
     } catch (err) {
       console.error('Error updating watch:', err);
@@ -208,7 +208,7 @@ export default function WatchEditPage() {
                       <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path>
                       </svg>
-                      <Link href={`/dashboard/watch/${watch._id}`} className="ml-1 text-sm font-medium text-gray-700 hover:text-indigo-600 md:ml-2 dark:text-gray-400 dark:hover:text-white">
+                      <Link href={`/dashboard/watch/view/?id=${watch._id}`} className="ml-1 text-sm font-medium text-gray-700 hover:text-indigo-600 md:ml-2 dark:text-gray-400 dark:hover:text-white">
                         {watch._id.slice(-8)}
                       </Link>
                     </div>
@@ -397,7 +397,7 @@ export default function WatchEditPage() {
                   {/* Form Actions */}
                   <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
                     <Link
-                      href={`/dashboard/watch/${watch._id}`}
+                      href={`/dashboard/watch/view/?id=${watch._id}`}
                       className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
                     >
                       Cancel
