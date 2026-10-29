@@ -6,6 +6,8 @@ import ProtectedRoute from '../../../../components/ProtectedRoute';
 import AdminSidebar from '../../../../components/AdminSidebar';
 import { useAuth } from '../../../../contexts/AuthContext';
 import api from '../../../../lib/api';
+import BulkActionBar, { BulkCheckbox, bulkButtonClass } from '../../../../components/BulkActionBar';
+import useBulkSelection from '../../../../lib/useBulkSelection';
 
 export default function ReportedProfilesPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -41,6 +43,15 @@ export default function ReportedProfilesPage() {
       setUpdatingId('');
     }
   };
+
+  const selection = useBulkSelection(reports.map((r) => r._id));
+
+  const handleBulkStatus = (status) => selection.run(async (ids) => {
+    const { data } = await api.post('/reports/bulk-status', { ids, status });
+    const updated = new Set(ids);
+    setReports(prev => prev.map(r => updated.has(r._id) ? { ...r, status } : r));
+    return `Marked ${data.updated} report(s) as ${status}.`;
+  });
 
   return (
     <ProtectedRoute>
@@ -83,11 +94,29 @@ export default function ReportedProfilesPage() {
                 </div>
               )}
 
+              {!loading && (
+                <BulkActionBar selection={selection} total={reports.length}>
+                  <button type="button" onClick={() => handleBulkStatus('reviewed')} className={bulkButtonClass.success}>Mark Reviewed</button>
+                  <button type="button" onClick={() => handleBulkStatus('dismissed')} className={bulkButtonClass.neutral}>Dismiss</button>
+                  <button type="button" onClick={() => handleBulkStatus('open')} className={bulkButtonClass.primary}>Reopen</button>
+                </BulkActionBar>
+              )}
+
               <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
                 <div className="min-w-full overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-50 dark:bg-gray-700">
                       <tr>
+                        <th className="w-10 px-4 py-3">
+                          <input
+                            type="checkbox"
+                            aria-label="Select all"
+                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            checked={selection.allSelected}
+                            onChange={selection.toggleAll}
+                            disabled={loading || reports.length === 0}
+                          />
+                        </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Profile</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Reported By</th>
@@ -100,18 +129,21 @@ export default function ReportedProfilesPage() {
                     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                       {loading ? (
                         <tr>
-                          <td colSpan={7} className="px-6 py-6 text-center text-gray-500 dark:text-gray-400">Loading...</td>
+                          <td colSpan={8} className="px-6 py-6 text-center text-gray-500 dark:text-gray-400">Loading...</td>
                         </tr>
                       ) : reports.length === 0 ? (
                         <tr>
-                          <td colSpan={7} className="px-6 py-6 text-center text-gray-500 dark:text-gray-400">No reports found</td>
+                          <td colSpan={8} className="px-6 py-6 text-center text-gray-500 dark:text-gray-400">No reports found</td>
                         </tr>
                       ) : (
                         reports.map((r) => {
                           const profileName = r.targetProfile?.user ? `${r.targetProfile.user.firstName || ''} ${r.targetProfile.user.surname || ''}`.trim() : (r.targetProfile?.displayName || r.targetProfile?.username || 'Unknown');
                           const reporterName = r.reportedBy?.fullName || r.reportedBy?.displayName || [r.reportedBy?.user?.firstName, r.reportedBy?.user?.surname].filter(Boolean).join(' ') || 'Unknown';
                           return (
-                            <tr key={r._id}>
+                            <tr key={r._id} className={selection.isSelected(r._id) ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''}>
+                              <td className="w-10 px-4 py-4">
+                                <BulkCheckbox selection={selection} id={r._id} />
+                              </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{r._id.slice(-8)}</td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                 <div className="flex items-center space-x-2">

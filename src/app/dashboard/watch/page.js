@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useAuth } from '../../../contexts/AuthContext';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import AdminSidebar from '../../../components/AdminSidebar';
+import BulkActionBar, { BulkCheckbox, AudienceSelect, bulkButtonClass, bulkDeleteMessage } from '../../../components/BulkActionBar';
+import useBulkSelection from '../../../lib/useBulkSelection';
 import api from '../../../lib/api';
 import AICategoryDetails from '../../../components/AICategoryDetails';
 
@@ -144,6 +146,22 @@ export default function WatchPage() {
         return aValue < bValue ? 1 : -1;
       }
     });
+
+  const selection = useBulkSelection(filteredWatches.map((watch) => watch._id));
+
+  const handleBulkDelete = () => selection.run(async (ids) => {
+    const { data } = await api.post('/watches/bulk-delete', { ids });
+    const deleted = new Set(data.succeeded || []);
+    setWatches(prev => prev.filter(watch => !deleted.has(watch._id)));
+    return bulkDeleteMessage(data, 'video');
+  }, { confirmText: `Delete ${selection.selectedIds.length} selected video(s) and all their comments? This cannot be undone.` });
+
+  const handleBulkAudience = (audience) => selection.run(async (ids) => {
+    const { data } = await api.post('/watches/bulk-update', { ids, audience });
+    const updated = new Set(ids);
+    setWatches(prev => prev.map(watch => updated.has(watch._id) ? { ...watch, audience } : watch));
+    return `Updated audience for ${data.updated} video(s).`;
+  });
 
   return (
     <ProtectedRoute>
@@ -287,6 +305,13 @@ export default function WatchPage() {
                 </div>
               )}
 
+              {!loading && !error && (
+                <BulkActionBar selection={selection} total={filteredWatches.length}>
+                  <AudienceSelect onSelect={handleBulkAudience} />
+                  <button type="button" onClick={handleBulkDelete} className={bulkButtonClass.danger}>Delete selected</button>
+                </BulkActionBar>
+              )}
+
               {/* Videos Grid */}
               {!loading && !error && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -296,11 +321,12 @@ export default function WatchPage() {
                     const watchType = getWatchType(watch);
                     
                     return (
-                      <div key={watch._id} className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-200">
+                      <div key={watch._id} className={`bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-200 ${selection.isSelected(watch._id) ? 'ring-2 ring-indigo-500' : ''}`}>
                         <div className="p-6">
                           {/* Video Header */}
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center space-x-3">
+                              <BulkCheckbox selection={selection} id={watch._id} className="flex-shrink-0" />
                               <div className="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center">
                                 <span className="text-sm font-medium text-white">
                                   {author.split(' ').map(n => n[0]).join('').toUpperCase()}

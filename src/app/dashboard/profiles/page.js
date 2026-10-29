@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useAuth } from '../../../contexts/AuthContext';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import AdminSidebar from '../../../components/AdminSidebar';
+import BulkActionBar, { BulkCheckbox, bulkButtonClass, bulkDeleteMessage } from '../../../components/BulkActionBar';
+import useBulkSelection from '../../../lib/useBulkSelection';
 import api from '../../../lib/api';
 
 export default function ProfilesPage() {
@@ -144,6 +146,22 @@ export default function ProfilesPage() {
         return aValue < bValue ? 1 : -1;
       }
     });
+
+  const selection = useBulkSelection(filteredProfiles.map((profile) => profile._id));
+
+  const handleBulkVerify = (isVerified) => selection.run(async (ids) => {
+    const { data } = await api.post('/profiles/bulk-update', { ids, isVerified });
+    const updated = new Set(ids);
+    setProfiles(prev => prev.map(profile => updated.has(profile._id) ? { ...profile, isVerified } : profile));
+    return `${isVerified ? 'Verified' : 'Unverified'} ${data.updated} profile(s).`;
+  });
+
+  const handleBulkDelete = () => selection.run(async (ids) => {
+    const { data } = await api.post('/profiles/bulk-delete', { ids });
+    const deleted = new Set(data.succeeded || []);
+    setProfiles(prev => prev.filter(profile => !deleted.has(profile._id)));
+    return bulkDeleteMessage(data, 'profile');
+  }, { confirmText: `Permanently delete ${selection.selectedIds.length} selected account(s) and all their data? This cannot be undone.` });
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -344,6 +362,14 @@ export default function ProfilesPage() {
                 </div>
               )}
 
+              {!loading && !error && (
+                <BulkActionBar selection={selection} total={filteredProfiles.length}>
+                  <button type="button" onClick={() => handleBulkVerify(true)} className={bulkButtonClass.success}>Verify</button>
+                  <button type="button" onClick={() => handleBulkVerify(false)} className={bulkButtonClass.neutral}>Unverify</button>
+                  <button type="button" onClick={handleBulkDelete} className={bulkButtonClass.danger}>Delete selected</button>
+                </BulkActionBar>
+              )}
+
               {/* Profiles Grid */}
               {!loading && !error && (
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -355,10 +381,11 @@ export default function ProfilesPage() {
                     const joinDate = profile.user?.createdAt ? new Date(profile.user.createdAt).toLocaleDateString() : 'Unknown';
                     
                     return (
-                      <div key={profile._id} className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-200">
+                      <div key={profile._id} className={`bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-200 ${selection.isSelected(profile._id) ? 'ring-2 ring-indigo-500' : ''}`}>
                         <div className="p-6">
                           {/* Profile Header */}
                           <div className="flex items-center space-x-4 mb-4">
+                            <BulkCheckbox selection={selection} id={profile._id} className="flex-shrink-0" />
                             {profile.profilePic ? (
                               <img 
                                 src={profile.profilePic} 
@@ -375,6 +402,9 @@ export default function ProfilesPage() {
                             <div className="flex-1 min-w-0">
                               <h3 className="text-lg font-medium text-gray-900 dark:text-white truncate">
                                 {profileName}
+                                {profile.isVerified && (
+                                  <span className="ml-2 align-middle inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">Verified</span>
+                                )}
                               </h3>
                               <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                                 {profileEmail}

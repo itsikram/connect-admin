@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import AdminSidebar from '../../../components/AdminSidebar';
+import BulkActionBar, { BulkCheckbox, bulkButtonClass, bulkDeleteMessage } from '../../../components/BulkActionBar';
+import useBulkSelection from '../../../lib/useBulkSelection';
 import api from '../../../lib/api';
 
 const getAuthorName = (story) =>
@@ -58,6 +60,15 @@ export default function StoriesPage() {
         || String(story.bgColor || '').toLowerCase().includes(query);
     });
   }, [searchTerm, stories]);
+
+  const selection = useBulkSelection(useMemo(() => filteredStories.map((story) => story._id), [filteredStories]));
+
+  const handleBulkDelete = () => selection.run(async (ids) => {
+    const { data } = await api.post('/stories/bulk-delete', { ids });
+    const deleted = new Set(data.succeeded || []);
+    setStories((currentStories) => currentStories.filter((story) => !deleted.has(story._id)));
+    return bulkDeleteMessage(data, 'story');
+  }, { confirmText: `Delete ${selection.selectedIds.length} selected story(s)? This cannot be undone.` });
 
   const handleDelete = async () => {
     if (!storyToDelete) return;
@@ -135,10 +146,16 @@ export default function StoriesPage() {
               {loading && <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600" /></div>}
               {error && <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6 text-sm text-red-700 dark:text-red-300">{error}</div>}
 
+              {!loading && !error && (
+                <BulkActionBar selection={selection} total={filteredStories.length}>
+                  <button type="button" onClick={handleBulkDelete} className={bulkButtonClass.danger}>Delete selected</button>
+                </BulkActionBar>
+              )}
+
               {!loading && !error && filteredStories.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredStories.map((story) => (
-                    <article key={story._id} className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+                    <article key={story._id} className={`bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden ${selection.isSelected(story._id) ? 'ring-2 ring-indigo-500' : ''}`}>
                       <div
                         className="h-64 flex items-center justify-center bg-cover bg-center"
                         style={{ backgroundColor: story.bgColor || '#4f46e5' }}
@@ -151,9 +168,12 @@ export default function StoriesPage() {
                       </div>
                       <div className="p-5">
                         <div className="flex items-center justify-between mb-4">
-                          <div>
+                          <div className="flex items-center gap-3">
+                            <BulkCheckbox selection={selection} id={story._id} />
+                            <div>
                             <h2 className="text-sm font-semibold text-gray-900 dark:text-white">{getAuthorName(story)}</h2>
                             <p className="text-xs text-gray-500 dark:text-gray-400">{getStoryDate(story.createdAt)}</p>
+                            </div>
                           </div>
                           <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
                             Story
