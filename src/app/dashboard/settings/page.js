@@ -381,7 +381,7 @@ export default function SettingsPage() {
   };
 
   // Render form field
-  const renderField = (section, field, label, type = 'text', options = []) => {
+  const renderField = (section, field, label, type = 'text', options = [], hint = '') => {
     const value = settings[section][field];
     
     return (
@@ -432,6 +432,9 @@ export default function SettingsPage() {
             onChange={(e) => handleInputChange(section, field, e.target.value)}
             className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
+        )}
+        {hint && (
+          <p className="text-xs text-gray-500 dark:text-gray-400">{hint}</p>
         )}
       </div>
     );
@@ -612,7 +615,8 @@ export default function SettingsPage() {
                             {renderField('general', 'siteUrl', 'Site URL', 'url')}
                             {renderField('general', 'apkUrl', 'APK URL', 'url')}
                             {renderField('general', 'ipaUrl', 'IPA URL', 'url')}
-                          {renderField('general', 'appVersion', 'App Version')}
+                          {renderField('general', 'appVersion', 'App Version', 'text', [],
+                            'Android apps on an older version download the APK URL and update themselves. Enter the APK\'s version name (e.g. 2.1.7).')}
                           {renderField('general', 'isNewVersionAvailable', 'Is New Version Available', 'checkbox')}
                             {renderField('general', 'showAds', 'Show Ads', 'checkbox')}
                             {renderField('general', 'registerNewAccount', 'Register New Account', 'checkbox')}
