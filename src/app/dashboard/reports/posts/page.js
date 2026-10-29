@@ -119,7 +119,7 @@ export default function ReportedPostsPage() {
                                   <div className="flex items-center space-x-2">
                                     <span className="text-gray-700 dark:text-gray-300">{authorName}</span>
                                     {r.targetPost?._id && (
-                                      <Link href={`/dashboard/posts/${r.targetPost._id}`} className="text-indigo-600 dark:text-indigo-400 hover:underline">View</Link>
+                                      <Link href={`/dashboard/posts/view/?id=${r.targetPost._id}`} className="text-indigo-600 dark:text-indigo-400 hover:underline">View</Link>
                                     )}
                                   </div>
                                   {caption ? (

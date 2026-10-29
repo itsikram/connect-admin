@@ -158,7 +158,7 @@ export default function EditPostPage() {
       
       setSuccess(true);
       setTimeout(() => {
-        router.push(`/dashboard/posts/${params.id}`);
+        router.push(`/dashboard/posts/view/?id=${params.id}`);
       }, 1500);
       
     } catch (err) {
@@ -257,7 +257,7 @@ export default function EditPostPage() {
             <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
               <div className="flex flex-1">
                 <Link 
-                  href={`/dashboard/posts/${params.id}`}
+                  href={`/dashboard/posts/view/?id=${params.id}`}
                   className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 >
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -565,7 +565,7 @@ export default function EditPostPage() {
                 {/* Form Actions */}
                 <div className="flex items-center justify-between pt-6">
                   <Link
-                    href={`/dashboard/posts/${params.id}`}
+                    href={`/dashboard/posts/view/?id=${params.id}`}
                     className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Cancel

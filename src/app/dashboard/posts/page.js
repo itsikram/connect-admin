@@ -532,7 +532,7 @@ export default function PostsPage() {
                             </span>
                             <div className="flex space-x-2">
                               <Link
-                                href={`/dashboard/posts/${post._id}`}
+                                href={`/dashboard/posts/view/?id=${post._id}`}
                                 className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
                                 title="View Post"
                               >
@@ -541,7 +541,7 @@ export default function PostsPage() {
                                 </svg>
                               </Link>
                               <Link
-                                href={`/dashboard/posts/${post._id}/edit`}
+                                href={`/dashboard/posts/edit/?id=${post._id}`}
                                 className="p-2 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer"
                                 title="Edit Post"
                               >

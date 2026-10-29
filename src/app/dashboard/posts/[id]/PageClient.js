@@ -475,7 +475,7 @@ export default function ViewPostPage() {
                   <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
                     <div className="flex space-x-3">
                       <Link
-                        href={`/dashboard/posts/${post._id}/edit`}
+                        href={`/dashboard/posts/edit/?id=${post._id}`}
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
