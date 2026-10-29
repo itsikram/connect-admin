@@ -7,6 +7,8 @@ import ProtectedRoute from '../../../components/ProtectedRoute';
 import api from '../../../lib/api';
 import AICategoryDetails from '../../../components/AICategoryDetails';
 import AdminSidebar from '../../../components/AdminSidebar';
+import BulkActionBar, { BulkCheckbox, AudienceSelect, bulkButtonClass, bulkDeleteMessage } from '../../../components/BulkActionBar';
+import useBulkSelection from '../../../lib/useBulkSelection';
 
 export default function PostsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -205,6 +207,22 @@ export default function PostsPage() {
       }
     });
 
+  const selection = useBulkSelection(filteredPosts.map((post) => post._id));
+
+  const handleBulkDelete = () => selection.run(async (ids) => {
+    const { data } = await api.post('/posts/bulk-delete', { ids });
+    const deleted = new Set(data.succeeded || []);
+    setPosts(prev => prev.filter(post => !deleted.has(post._id)));
+    return bulkDeleteMessage(data, 'post');
+  }, { confirmText: `Delete ${selection.selectedIds.length} selected post(s) and all their comments? This cannot be undone.` });
+
+  const handleBulkAudience = (audience) => selection.run(async (ids) => {
+    const { data } = await api.post('/posts/bulk-update', { ids, audience });
+    const updated = new Set(ids);
+    setPosts(prev => prev.map(post => updated.has(post._id) ? { ...post, audience } : post));
+    return `Updated audience for ${data.updated} post(s).`;
+  });
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
@@ -352,6 +370,13 @@ export default function PostsPage() {
                 </div>
               )}
 
+              {!loading && !error && (
+                <BulkActionBar selection={selection} total={filteredPosts.length}>
+                  <AudienceSelect onSelect={handleBulkAudience} />
+                  <button type="button" onClick={handleBulkDelete} className={bulkButtonClass.danger}>Delete selected</button>
+                </BulkActionBar>
+              )}
+
               {/* Posts Grid */}
               {!loading && !error && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -364,11 +389,12 @@ export default function PostsPage() {
                     const audienceLabel = getAudienceLabel(post.audience);
                     
                     return (
-                      <div key={post._id} className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-200">
+                      <div key={post._id} className={`bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-200 ${selection.isSelected(post._id) ? 'ring-2 ring-indigo-500' : ''}`}>
                         <div className="p-6">
                           {/* Post Header */}
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center space-x-3 min-w-0">
+                              <BulkCheckbox selection={selection} id={post._id} className="flex-shrink-0" />
                               {authorAvatar ? (
                                 <img
                                   src={authorAvatar}

@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useAuth } from '../../../contexts/AuthContext';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import AdminSidebar from '../../../components/AdminSidebar';
+import BulkActionBar, { BulkCheckbox, bulkButtonClass, bulkDeleteMessage } from '../../../components/BulkActionBar';
+import useBulkSelection from '../../../lib/useBulkSelection';
 import api from '../../../lib/api';
 
 export default function UsersPage() {
@@ -129,6 +131,22 @@ export default function UsersPage() {
       return aValue < bValue ? 1 : -1;
     });
 
+  const selection = useBulkSelection(filteredUsers.map((profile) => profile._id));
+
+  const handleBulkVerify = (isVerified) => selection.run(async (ids) => {
+    const { data } = await api.post('/profiles/bulk-update', { ids, isVerified });
+    const updated = new Set(ids);
+    setUsers((prev) => prev.map((profile) => (updated.has(profile._id) ? { ...profile, isVerified } : profile)));
+    return `${isVerified ? 'Verified' : 'Unverified'} ${data.updated} user(s).`;
+  });
+
+  const handleBulkDelete = () => selection.run(async (ids) => {
+    const { data } = await api.post('/profiles/bulk-delete', { ids });
+    const deleted = new Set(data.succeeded || []);
+    setUsers((prev) => prev.filter((profile) => !deleted.has(profile._id)));
+    return bulkDeleteMessage(data, 'user');
+  }, { confirmText: `Permanently delete ${selection.selectedIds.length} selected account(s) and all their data? This cannot be undone.` });
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
@@ -244,11 +262,28 @@ export default function UsersPage() {
               )}
 
               {!loading && !error && (
+                <BulkActionBar selection={selection} total={filteredUsers.length}>
+                  <button type="button" onClick={() => handleBulkVerify(true)} className={bulkButtonClass.success}>Verify</button>
+                  <button type="button" onClick={() => handleBulkVerify(false)} className={bulkButtonClass.neutral}>Unverify</button>
+                  <button type="button" onClick={handleBulkDelete} className={bulkButtonClass.danger}>Delete selected</button>
+                </BulkActionBar>
+              )}
+
+              {!loading && !error && (
                 <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                       <thead className="bg-gray-50 dark:bg-gray-900/40">
                         <tr>
+                          <th className="w-10 px-4 py-3">
+                            <input
+                              type="checkbox"
+                              aria-label="Select all"
+                              className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                              checked={selection.allSelected}
+                              onChange={selection.toggleAll}
+                            />
+                          </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Auth</th>
@@ -264,7 +299,10 @@ export default function UsersPage() {
                           const authType = getAuthType(profile);
 
                           return (
-                            <tr key={profile._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/40">
+                            <tr key={profile._id} className={`hover:bg-gray-50 dark:hover:bg-gray-700/40 ${selection.isSelected(profile._id) ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''}`}>
+                              <td className="w-10 px-4 py-4">
+                                <BulkCheckbox selection={selection} id={profile._id} />
+                              </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="flex items-center">
                                   {profile.profilePic ? (
