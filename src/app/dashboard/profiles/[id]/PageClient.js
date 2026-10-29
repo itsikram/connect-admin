@@ -257,7 +257,7 @@ export default function ProfileViewPage() {
                     </div>
                     <div className="flex space-x-3">
                       <Link
-                        href={`/dashboard/profiles/${profile._id}/edit`}
+                        href={`/dashboard/profiles/edit/?id=${profile._id}`}
                         className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors duration-200"
                       >
                         Edit Profile

@@ -350,13 +350,13 @@ export default function UsersPage() {
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                 <Link
-                                  href={`/dashboard/profiles/${profile._id}`}
+                                  href={`/dashboard/profiles/view/?id=${profile._id}`}
                                   className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
                                 >
                                   View
                                 </Link>
                                 <Link
-                                  href={`/dashboard/profiles/${profile._id}/edit`}
+                                  href={`/dashboard/profiles/edit/?id=${profile._id}`}
                                   className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
                                 >
                                   Edit
