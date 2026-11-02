@@ -30,6 +30,15 @@ const putToDrive = (uploadUrl, file, onProgress) => new Promise((resolve, reject
   xhr.send(file);
 });
 
+// A bare 404 means the API server runs code without the APK routes
+const apkErrorText = (error, fallback) => {
+  if (error.response?.data?.message) return error.response.data.message;
+  if (error.response?.status === 404) {
+    return `${API_CONFIG.BASE_URL} has no APK upload yet. Deploy the latest server code there, or point the admin at a server that has it.`;
+  }
+  return error.message || fallback;
+};
+
 const AI_PROVIDERS = [
   { id: 'gemini', label: 'Google Gemini', hint: 'Google AI Studio key. Comma-separate multiple keys for quota failover.' },
   { id: 'openai', label: 'OpenAI ChatGPT', hint: 'From platform.openai.com. Starts with sk-.' },
@@ -375,7 +384,7 @@ export default function SettingsPage() {
     } catch (error) {
       setMessage({
         type: 'error',
-        text: error.response?.data?.message || error.message || 'APK upload failed',
+        text: apkErrorText(error, 'APK upload failed'),
       });
     } finally {
       setApkProgress(null);
@@ -391,7 +400,7 @@ export default function SettingsPage() {
     } catch (error) {
       setMessage({
         type: 'error',
-        text: error.response?.data?.message || error.message || 'Could not copy the APK',
+        text: apkErrorText(error, 'Could not copy the APK'),
       });
     }
   };
