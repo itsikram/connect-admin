@@ -11,6 +11,25 @@ import { API_CONFIG } from '../../../lib/config';
 import adminApi from '../../../lib/api';
 import ServerSettingsPanel from './ServerSettingsPanel';
 
+// PUTs a file to a Google Drive resumable upload URL and resolves with the
+// created Drive file. Plain XHR so no admin token is sent to Google.
+const putToDrive = (uploadUrl, file, onProgress) => new Promise((resolve, reject) => {
+  const xhr = new XMLHttpRequest();
+  xhr.open('PUT', uploadUrl);
+  xhr.setRequestHeader('Content-Type', 'application/vnd.android.package-archive');
+  xhr.upload.onprogress = (event) => {
+    if (event.lengthComputable) onProgress(Math.min(99, Math.round((event.loaded / event.total) * 100)));
+  };
+  xhr.onload = () => {
+    let body = null;
+    try { body = JSON.parse(xhr.responseText); } catch (_) {}
+    if (xhr.status >= 200 && xhr.status < 300 && body?.id) resolve(body);
+    else reject(new Error(body?.error?.message || `Google Drive upload failed (HTTP ${xhr.status})`));
+  };
+  xhr.onerror = () => reject(new Error('Upload to Google Drive was interrupted. Check your connection and try again.'));
+  xhr.send(file);
+});
+
 const AI_PROVIDERS = [
   { id: 'gemini', label: 'Google Gemini', hint: 'Google AI Studio key. Comma-separate multiple keys for quota failover.' },
   { id: 'openai', label: 'OpenAI ChatGPT', hint: 'From platform.openai.com. Starts with sk-.' },
@@ -114,6 +133,12 @@ export default function SettingsPage() {
   const [message, setMessage] = useState({ type: '', text: '' });
   // Upload progress (0-100) of an APK going to Google Drive; null when idle
   const [apkProgress, setApkProgress] = useState(null);
+  // Server job copying an APK from a link: { state, progress, message, ... }
+  const [apkJob, setApkJob] = useState(null);
+  const [apkLink, setApkLink] = useState('');
+  const [apkDragging, setApkDragging] = useState(false);
+  const apkJobRunning = apkJob?.state === 'downloading' || apkJob?.state === 'uploading';
+  const apkBusy = apkProgress !== null || apkJobRunning;
   const [aiSettings, setAiSettings] = useState(createEmptyAiSettings);
   const [aiLoading, setAiLoading] = useState(true);
   const [aiTesting, setAiTesting] = useState('');
@@ -323,23 +348,30 @@ export default function SettingsPage() {
     }
   };
 
-  // Uploads the APK to Google Drive; the server saves its link as the APK URL
-  const handleApkUpload = async (e) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file) return;
-    setApkProgress(0);
+  const apkSavedMessage = (name) => ({
+    type: 'success',
+    text: `${name} is in Google Drive and set as the APK URL. Set App Version to its version name and save.`,
+  });
+
+  // The APK goes from the browser straight to Google Drive (the API's proxy
+  // rejects large uploads); the server only creates the upload and saves it.
+  const uploadApkFile = async (file) => {
+    if (!file || apkBusy) return;
     setMessage({ type: '', text: '' });
+    const head = new Uint8Array(await file.slice(0, 4).arrayBuffer());
+    const isZip = head[0] === 0x50 && head[1] === 0x4b && head[2] === 0x03 && head[3] === 0x04;
+    if (!/\.apk$/i.test(file.name) || !isZip) {
+      setMessage({ type: 'error', text: 'Choose an Android .apk file' });
+      return;
+    }
+    setApkProgress(0);
     try {
-      const formData = new FormData();
-      formData.append('apk', file);
-      const res = await adminApi.post('/apk', formData, {
-        onUploadProgress: (event) => {
-          if (event.total) setApkProgress(Math.round((event.loaded / event.total) * 100));
-        },
-      });
+      const { data: session } = await adminApi.post('/apk/upload-session', { name: file.name, size: file.size });
+      const driveFile = await putToDrive(session.uploadUrl, file, setApkProgress);
+      setApkProgress(100);
+      const res = await adminApi.post('/apk/complete', { account: session.account, fileId: driveFile.id });
       handleInputChange('general', 'apkUrl', res.data?.apkUrl || '');
-      setMessage({ type: 'success', text: `${file.name} uploaded to Google Drive and set as the APK URL. Set App Version to its version name and save.` });
+      setMessage(apkSavedMessage(file.name));
     } catch (error) {
       setMessage({
         type: 'error',
@@ -349,6 +381,48 @@ export default function SettingsPage() {
       setApkProgress(null);
     }
   };
+
+  const copyApkFromLink = async () => {
+    if (!apkLink.trim() || apkBusy) return;
+    setMessage({ type: '', text: '' });
+    try {
+      const res = await adminApi.post('/apk/from-url', { url: apkLink.trim() });
+      setApkJob(res.data);
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.message || error.message || 'Could not copy the APK',
+      });
+    }
+  };
+
+  // Poll the server while it copies an APK from a link
+  useEffect(() => {
+    if (!apkJobRunning) return undefined;
+    const timer = setInterval(async () => {
+      try {
+        const { data } = await adminApi.get('/apk/status');
+        setApkJob(data);
+        if (data.state === 'done') {
+          handleInputChange('general', 'apkUrl', data.apkUrl || '');
+          setMessage(apkSavedMessage(data.name || 'The APK'));
+          setApkLink('');
+        } else if (data.state === 'failed') {
+          setMessage({ type: 'error', text: data.message || 'Could not copy the APK' });
+        }
+      } catch (_) {
+        // Keep polling; the copy continues on the server
+      }
+    }, 2000);
+    return () => clearInterval(timer);
+  }, [apkJobRunning]);
+
+  // A copy started before this page was opened
+  useEffect(() => {
+    adminApi.get('/apk/status').then(({ data }) => {
+      if (data?.state === 'downloading' || data?.state === 'uploading') setApkJob(data);
+    }).catch(() => {});
+  }, []);
 
   const handleAiField = (field, value) => {
     setAiSettings((prev) => ({ ...prev, [field]: value }));
@@ -642,23 +716,65 @@ export default function SettingsPage() {
                             </div>
                             {renderField('general', 'siteTitle', 'Site Title')}
                             {renderField('general', 'siteUrl', 'Site URL', 'url')}
-                            <div className="space-y-2">
+                            <div className="space-y-2 sm:col-span-2">
                               {renderField('general', 'apkUrl', 'APK URL', 'url')}
-                              <div className="flex items-center gap-3">
-                                <label className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold bg-indigo-50 text-indigo-700 dark:bg-gray-700 dark:text-indigo-200 ${apkProgress === null ? 'cursor-pointer hover:bg-indigo-100' : 'opacity-60 cursor-wait'}`}>
-                                  {apkProgress === null ? 'Upload APK' : apkProgress < 100 ? `Uploading… ${apkProgress}%` : 'Saving to Google Drive…'}
-                                  <input
-                                    type="file"
-                                    accept=".apk,application/vnd.android.package-archive"
-                                    className="hidden"
-                                    disabled={apkProgress !== null}
-                                    onChange={handleApkUpload}
-                                  />
-                                </label>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                  Stored in Google Drive; replaces the APK URL and removes the previous uploaded APK.
-                                </p>
+                              <div
+                                onDragOver={(e) => { e.preventDefault(); if (!apkBusy) setApkDragging(true); }}
+                                onDragLeave={() => setApkDragging(false)}
+                                onDrop={(e) => {
+                                  e.preventDefault();
+                                  setApkDragging(false);
+                                  uploadApkFile(e.dataTransfer.files?.[0]);
+                                }}
+                                className={`rounded-lg border-2 border-dashed p-4 text-center text-sm transition-colors ${apkDragging ? 'border-indigo-500 bg-indigo-50 dark:bg-gray-700' : 'border-gray-300 dark:border-gray-600'}`}
+                              >
+                                {apkProgress !== null ? (
+                                  <p className="text-gray-700 dark:text-gray-200">
+                                    {apkProgress < 100 ? `Uploading to Google Drive… ${apkProgress}%` : 'Saving…'}
+                                  </p>
+                                ) : (
+                                  <p className="text-gray-600 dark:text-gray-300">
+                                    Drag and drop the APK here, or{' '}
+                                    <label className={`font-semibold text-indigo-600 dark:text-indigo-300 ${apkBusy ? 'opacity-60 cursor-wait' : 'cursor-pointer hover:underline'}`}>
+                                      choose a file
+                                      <input
+                                        type="file"
+                                        accept=".apk,application/vnd.android.package-archive"
+                                        className="hidden"
+                                        disabled={apkBusy}
+                                        onChange={(e) => {
+                                          const file = e.target.files?.[0];
+                                          e.target.value = '';
+                                          uploadApkFile(file);
+                                        }}
+                                      />
+                                    </label>
+                                  </p>
+                                )}
                               </div>
+                              <div className="flex gap-2">
+                                <input
+                                  type="url"
+                                  value={apkLink}
+                                  onChange={(e) => setApkLink(e.target.value)}
+                                  placeholder="Or paste an APK link (Google Drive share link works)"
+                                  disabled={apkBusy}
+                                  className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={copyApkFromLink}
+                                  disabled={apkBusy || !apkLink.trim()}
+                                  className="shrink-0 px-3 py-2 rounded-lg text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+                                >
+                                  {apkJobRunning
+                                    ? apkJob.state === 'uploading' ? 'Saving…' : `Copying… ${apkJob.progress || 0}%`
+                                    : 'Copy to Drive'}
+                                </button>
+                              </div>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Stored in Google Drive and set as the APK URL; the previous uploaded APK is removed. A Drive link must be shared as &quot;Anyone with the link&quot;.
+                              </p>
                             </div>
                             {renderField('general', 'ipaUrl', 'IPA URL', 'url')}
                           {renderField('general', 'appVersion', 'App Version', 'text', [],
