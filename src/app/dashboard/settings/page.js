@@ -112,6 +112,8 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  // Upload progress (0-100) of an APK going to Google Drive; null when idle
+  const [apkProgress, setApkProgress] = useState(null);
   const [aiSettings, setAiSettings] = useState(createEmptyAiSettings);
   const [aiLoading, setAiLoading] = useState(true);
   const [aiTesting, setAiTesting] = useState('');
@@ -318,6 +320,33 @@ export default function SettingsPage() {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Uploads the APK to Google Drive; the server saves its link as the APK URL
+  const handleApkUpload = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setApkProgress(0);
+    setMessage({ type: '', text: '' });
+    try {
+      const formData = new FormData();
+      formData.append('apk', file);
+      const res = await adminApi.post('/apk', formData, {
+        onUploadProgress: (event) => {
+          if (event.total) setApkProgress(Math.round((event.loaded / event.total) * 100));
+        },
+      });
+      handleInputChange('general', 'apkUrl', res.data?.apkUrl || '');
+      setMessage({ type: 'success', text: `${file.name} uploaded to Google Drive and set as the APK URL. Set App Version to its version name and save.` });
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.message || error.message || 'APK upload failed',
+      });
+    } finally {
+      setApkProgress(null);
     }
   };
 
@@ -613,7 +642,24 @@ export default function SettingsPage() {
                             </div>
                             {renderField('general', 'siteTitle', 'Site Title')}
                             {renderField('general', 'siteUrl', 'Site URL', 'url')}
-                            {renderField('general', 'apkUrl', 'APK URL', 'url')}
+                            <div className="space-y-2">
+                              {renderField('general', 'apkUrl', 'APK URL', 'url')}
+                              <div className="flex items-center gap-3">
+                                <label className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold bg-indigo-50 text-indigo-700 dark:bg-gray-700 dark:text-indigo-200 ${apkProgress === null ? 'cursor-pointer hover:bg-indigo-100' : 'opacity-60 cursor-wait'}`}>
+                                  {apkProgress === null ? 'Upload APK' : apkProgress < 100 ? `Uploading… ${apkProgress}%` : 'Saving to Google Drive…'}
+                                  <input
+                                    type="file"
+                                    accept=".apk,application/vnd.android.package-archive"
+                                    className="hidden"
+                                    disabled={apkProgress !== null}
+                                    onChange={handleApkUpload}
+                                  />
+                                </label>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  Stored in Google Drive; replaces the APK URL and removes the previous uploaded APK.
+                                </p>
+                              </div>
+                            </div>
                             {renderField('general', 'ipaUrl', 'IPA URL', 'url')}
                           {renderField('general', 'appVersion', 'App Version', 'text', [],
                             'Android apps on an older version download the APK URL and update themselves. Enter the APK\'s version name (e.g. 2.1.7).')}
