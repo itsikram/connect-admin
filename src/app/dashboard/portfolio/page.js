@@ -276,7 +276,7 @@ export default function PortfolioAdminPage() {
       const formData = new FormData();
       formData.append('image', file);
       const res = await axios.post(`${API_CONFIG.BASE_URL.replace(/\/+$/, '')}/api/upload/admin`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { 'Content-Type': 'multipart/form-data', ...authHeaders() },
       });
       const url = res.data?.secure_url || res.data?.url;
       if (!url) throw new Error('No image URL returned');

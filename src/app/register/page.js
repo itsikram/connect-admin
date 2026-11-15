@@ -93,6 +93,13 @@ export default function RegisterPage() {
         role: formData.role
       });
 
+      // A super admin creating another admin stays signed in as themselves;
+      // only the very first admin account gets a session back.
+      if (!response.data.accessToken) {
+        router.push('/dashboard');
+        return;
+      }
+
       // Use auth context to store admin data
       login({
         admin_id: response.data.admin_id,

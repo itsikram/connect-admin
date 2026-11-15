@@ -11,6 +11,12 @@ import { API_CONFIG } from '../../../lib/config';
 import adminApi from '../../../lib/api';
 import ServerSettingsPanel from './ServerSettingsPanel';
 
+// The server only accepts app-config changes and admin uploads from a logged-in admin.
+const adminAuthHeaders = () => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : '';
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 // PUTs a file to a Google Drive resumable upload URL and resolves with the
 // created Drive file. Plain XHR so no admin token is sent to Google.
 const putToDrive = (uploadUrl, file, onProgress) => new Promise((resolve, reject) => {
@@ -333,7 +339,7 @@ export default function SettingsPage() {
         return;
       }
 
-      let res = await axios.put(API_CONFIG.BASE_URL + '/api/connect', settings.general);
+      let res = await axios.put(API_CONFIG.BASE_URL + '/api/connect', settings.general, { headers: adminAuthHeaders() });
       if (res.status === 200 || res.status === 201) {
         setSettings(prev => ({
           ...prev,
@@ -699,7 +705,8 @@ export default function SettingsPage() {
                                       const res = await axios.post(API_CONFIG.BASE_URL + '/api/upload/admin', formData, {
                                         method: 'POST',
                                         headers: {
-                                          'Content-Type': 'multipart/form-data'
+                                          'Content-Type': 'multipart/form-data',
+                                          ...adminAuthHeaders(),
                                         }
                                       });
                                       if (res.data.secure_url) {
