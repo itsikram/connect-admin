@@ -34,6 +34,80 @@ function UsageBar({ account }) {
   </div>;
 }
 
+const PHASE_LABELS = {
+  scanning: 'Scanning the database for Cloudinary links…',
+  copying: 'Copying files to Google Drive…',
+  rewriting: 'Updating links to the Drive copies…',
+  done: 'Finished',
+  failed: 'Stopped with an error',
+};
+
+// Copies every Cloudinary file the database links to into Google Drive and relinks it.
+function CloudinaryMigration({ driveActive }) {
+  const [job, setJob] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const running = job && !job.finishedAt;
+
+  const refresh = async () => {
+    try {
+      const { data } = await api.get('/gdrive/migrate-cloudinary');
+      setJob(data.job);
+    } catch (e) {
+      setError(e.response?.data?.message || 'Could not read the migration status');
+    }
+  };
+
+  useEffect(() => { refresh(); }, []);
+  useEffect(() => {
+    if (!running) return undefined;
+    const timer = window.setInterval(refresh, 3000);
+    return () => window.clearInterval(timer);
+  }, [running]);
+
+  const start = async (dryRun) => {
+    if (!dryRun && !window.confirm('Copy all Cloudinary files to Google Drive and switch every link to the Drive copy? Cloudinary files are kept as a backup.')) return;
+    setBusy(true);
+    setError('');
+    try {
+      const { data } = await api.post('/gdrive/migrate-cloudinary', { dryRun });
+      setJob(data.job);
+    } catch (e) {
+      setError(e.response?.data?.message || 'Could not start the migration');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const stat = (label, value) => <div className="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-900"><p className="text-[11px] uppercase tracking-wide text-slate-500">{label}</p><p className="text-sm font-semibold text-slate-900 dark:text-white">{value}</p></div>;
+
+  return <section className={cardClass}>
+    <h2 className="text-base font-semibold text-slate-900 dark:text-white">Move Cloudinary files to Google Drive</h2>
+    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Copies every Cloudinary file that posts, stories, messages, profiles and other records still link to into Google Drive, then points those links at the Drive copy. Cloudinary files are not deleted. Running it again only copies what is left.</p>
+    <div className="mt-4 flex flex-wrap gap-2">
+      <button type="button" disabled={busy || running} onClick={() => start(true)} className={smallButton}>Count files first</button>
+      <button type="button" disabled={busy || running || !driveActive} onClick={() => start(false)} className={primaryButton}>{running ? 'Running…' : 'Move files to Google Drive'}</button>
+      {job && <button type="button" onClick={refresh} className={smallButton}>Refresh</button>}
+    </div>
+    {!driveActive && <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">Turn on Google Drive uploads above before moving files.</p>}
+    {error && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{error}</p>}
+    {job && <div className="mt-4 space-y-3">
+      <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{job.dryRun ? 'Count only: ' : ''}{PHASE_LABELS[job.phase] || job.phase}{job.finishedAt ? ` (${new Date(job.finishedAt).toLocaleString()})` : ''}</p>
+      <div className="grid gap-2 sm:grid-cols-4">
+        {stat('Rows scanned', job.rowsScanned)}
+        {stat('Cloudinary files found', job.found)}
+        {stat('Already in Drive', job.alreadyCopied)}
+        {stat('Left to copy', job.toCopy)}
+        {!job.dryRun && stat('Copied now', `${job.copied} (${formatBytes(job.bytesCopied)})`)}
+        {!job.dryRun && stat('Missing on Cloudinary', job.missing)}
+        {!job.dryRun && stat('Failed', job.failed)}
+        {!job.dryRun && stat('Links updated', job.linksUpdated)}
+      </div>
+      {job.errors?.length > 0 && <details className="text-xs text-slate-600 dark:text-slate-300"><summary className="cursor-pointer font-semibold">{job.errors.length} error(s)</summary><ul className="mt-2 space-y-1">{job.errors.map((e, i) => <li key={i} className="break-all">{e.url || e.table ? `${e.url || `${e.table} ${e.id}`}: ` : ''}{e.reason}</li>)}</ul></details>}
+    </div>}
+  </section>;
+}
+
 export default function GoogleDrivePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [settings, setSettings] = useState(null);
@@ -209,9 +283,9 @@ export default function GoogleDrivePage() {
             </div>
             <label className="block"><span className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Where new uploads go</span>
               <select value={modeValue} onChange={(e) => setForm((f) => ({ ...f, uploadsEnabled: e.target.value === 'env' ? null : e.target.value === 'gdrive' }))} className={`${inputClass} sm:w-96`}>
-                <option value="gdrive">Google Drive</option>
-                <option value="cloudinary">Cloudinary</option>
-                <option value="env">Follow server .env (MEDIA_STORAGE{settings.envMediaStorage ? `=${settings.envMediaStorage}` : ' not set'})</option>
+                <option value="gdrive">Google Drive (recommended)</option>
+                <option value="cloudinary">Cloudinary (optional fallback)</option>
+                <option value="env">Follow server .env (MEDIA_STORAGE{settings.envMediaStorage ? `=${settings.envMediaStorage}` : ' not set: Google Drive'})</option>
               </select>
             </label>
 
@@ -233,6 +307,8 @@ export default function GoogleDrivePage() {
 
             <div className="flex justify-end"><button type="submit" disabled={saving} className={primaryButton}>{saving ? 'Saving…' : 'Save settings'}</button></div>
           </form>
+
+          <CloudinaryMigration driveActive={settings.active} />
         </>}
       </div></main>
     </div>
