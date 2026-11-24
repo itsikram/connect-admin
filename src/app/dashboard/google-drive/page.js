@@ -36,6 +36,7 @@ function UsageBar({ account }) {
 
 const PHASE_LABELS = {
   scanning: 'Scanning the database for Cloudinary links…',
+  cleaning: 'Removing unlinked copies left by an earlier run…',
   copying: 'Copying files to Google Drive…',
   rewriting: 'Updating links to the Drive copies…',
   done: 'Finished',
@@ -102,6 +103,7 @@ function CloudinaryMigration({ driveActive }) {
         {!job.dryRun && stat('Missing on Cloudinary', job.missing)}
         {!job.dryRun && stat('Failed', job.failed)}
         {!job.dryRun && stat('Links updated', job.linksUpdated)}
+        {!job.dryRun && job.orphansRemoved > 0 && stat('Unlinked copies removed', job.orphansRemoved)}
       </div>
       {job.errors?.length > 0 && <details className="text-xs text-slate-600 dark:text-slate-300"><summary className="cursor-pointer font-semibold">{job.errors.length} error(s)</summary><ul className="mt-2 space-y-1">{job.errors.map((e, i) => <li key={i} className="break-all">{e.url || e.table ? `${e.url || `${e.table} ${e.id}`}: ` : ''}{e.reason}</li>)}</ul></details>}
     </div>}
